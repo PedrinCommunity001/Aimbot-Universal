@@ -1,4 +1,4 @@
--- Pedrin Hub (Melhorado) - Aimbot com suavização, ESP, Speed Hack e compatível com loadstring
+-- Pedrin Hub (Final v3) - Aimbot ajustado, matar através da parede, botão de minimizar
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -40,6 +40,15 @@ Close.TextColor3 = Color3.new(1, 1, 1)
 Close.Font = Enum.Font.GothamBold
 Close.TextSize = 14
 
+local Minimize = Instance.new("TextButton", Frame)
+Minimize.Size = UDim2.new(0, 25, 0, 25)
+Minimize.Position = UDim2.new(1, -60, 0, 0)
+Minimize.Text = "_"
+Minimize.BackgroundColor3 = Color3.fromRGB(255, 200, 80)
+Minimize.TextColor3 = Color3.new(1, 1, 1)
+Minimize.Font = Enum.Font.GothamBold
+Minimize.TextSize = 14
+
 local OpenBtn = Instance.new("TextButton", ScreenGui)
 OpenBtn.Size = UDim2.new(0, 30, 0, 30)
 OpenBtn.Position = UDim2.new(0, 10, 0.5, 0)
@@ -51,6 +60,11 @@ OpenBtn.TextSize = 20
 OpenBtn.Visible = false
 
 Close.MouseButton1Click:Connect(function()
+    Frame.Visible = false
+    OpenBtn.Visible = true
+end)
+
+Minimize.MouseButton1Click:Connect(function()
     Frame.Visible = false
     OpenBtn.Visible = true
 end)
@@ -82,6 +96,7 @@ end
 local SpeedHack = false
 local AimbotAtivo = false
 local ESPAtivo = false
+local KillThroughWalls = false
 local SpeedValue = 90
 local AimbotSuavidade = 0.2 -- Ajuste a suavidade do Aimbot (0.1 = mais suave, 1 = mais rígido)
 local esp_objects = {}
@@ -132,6 +147,19 @@ local function EncontrarAlvo()
     end
     return alvo
 end
+
+-- Matar através da parede
+RunService.Heartbeat:Connect(function()
+    if KillThroughWalls then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Humanoid") then
+                if p.Character.Humanoid.Health > 0 then
+                    p.Character.Humanoid.Health = 0
+                end
+            end
+        end
+    end
+end)
 
 -- Render Loop
 RunService.RenderStepped:Connect(function()
@@ -186,5 +214,6 @@ end)
 CreateToggle("Speed Hack", 40, function(v) SpeedHack = v end)
 CreateToggle("Aimbot", 80, function(v) AimbotAtivo = v end)
 CreateToggle("ESP", 120, function(v) ESPAtivo = v end)
+CreateToggle("Kill Through Walls", 160, function(v) KillThroughWalls = v end)
 
-print("[Pedrin Hub] ✅ Aimbot com suavização, ESP e Speed Hack carregados com sucesso!")
+print("[Pedrin Hub] ✅ Aimbot ajustado, matar através da parede e botão de minimizar adicionados!")
