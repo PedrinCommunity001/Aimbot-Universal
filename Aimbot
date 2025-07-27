@@ -1,10 +1,11 @@
--- Pedrin Hub (Final v3) - Aimbot ajustado, matar através da parede, botão de minimizar
+-- Pedrin Hub (Final v3) - Hotkeys exibidas na interface
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 local Teams = game:GetService("Teams")
+local UserInputService = game:GetService("UserInputService")
 
 -- GUI
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -14,8 +15,8 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
 local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 250, 0, 230)
-Frame.Position = UDim2.new(0.5, -125, 0.4, 0)
+Frame.Size = UDim2.new(0, 300, 0, 300)
+Frame.Position = UDim2.new(0.5, -150, 0.4, 0)
 Frame.BackgroundColor3 = Color3.fromRGB(200, 230, 255)
 Frame.BorderSizePixel = 0
 Frame.Active = true
@@ -74,20 +75,20 @@ OpenBtn.MouseButton1Click:Connect(function()
     OpenBtn.Visible = false
 end)
 
-local function CreateToggle(labelText, yPos, callback)
+local function CreateToggle(labelText, hotkey, yPos, callback)
     local toggle = Instance.new("TextButton", Frame)
-    toggle.Size = UDim2.new(0, 210, 0, 30)
+    toggle.Size = UDim2.new(0, 260, 0, 30)
     toggle.Position = UDim2.new(0, 20, 0, yPos)
     toggle.BackgroundColor3 = Color3.fromRGB(235, 235, 255)
     toggle.TextColor3 = Color3.fromRGB(0, 0, 0)
     toggle.Font = Enum.Font.Gotham
     toggle.TextSize = 14
-    toggle.Text = labelText .. ": OFF"
+    toggle.Text = labelText .. " (OFF) [" .. hotkey .. "]"
 
     local enabled = false
     toggle.MouseButton1Click:Connect(function()
         enabled = not enabled
-        toggle.Text = labelText .. ": " .. (enabled and "ON" or "OFF")
+        toggle.Text = labelText .. " (" .. (enabled and "ON" or "OFF") .. ") [" .. hotkey .. "]"
         callback(enabled)
     end)
 end
@@ -98,8 +99,7 @@ local AimbotAtivo = false
 local ESPAtivo = false
 local KillThroughWalls = false
 local SpeedValue = 90
-local AimbotSuavidade = 0.2 -- Ajuste a suavidade do Aimbot (0.1 = mais suave, 1 = mais rígido)
-local esp_objects = {}
+local AimbotSuavidade = 0.3 -- Ajuste a suavidade do Aimbot (0.1 = mais suave, 1 = mais rígido)
 
 -- Detectar se é FFA (sem times)
 local function IsFFA()
@@ -148,19 +148,6 @@ local function EncontrarAlvo()
     return alvo
 end
 
--- Matar através da parede
-RunService.Heartbeat:Connect(function()
-    if KillThroughWalls then
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Humanoid") then
-                if p.Character.Humanoid.Health > 0 then
-                    p.Character.Humanoid.Health = 0
-                end
-            end
-        end
-    end
-end)
-
 -- Render Loop
 RunService.RenderStepped:Connect(function()
     if AimbotAtivo then
@@ -172,48 +159,30 @@ RunService.RenderStepped:Connect(function()
             Camera.CFrame = CFrame.new(cameraPos, novaPos)
         end
     end
+end)
 
-    for p, tag in pairs(esp_objects) do
-        tag.Visible = false
-        if not p or not p.Parent then
-            tag:Destroy()
-            esp_objects[p] = nil
-        end
-    end
-
-    if ESPAtivo then
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") then
-                if p.Character.Humanoid.Health > 0 then
-                    local pos, onScreen = Camera:WorldToViewportPoint(p.Character.Head.Position)
-                    if onScreen then
-                        if not esp_objects[p] then
-                            local tag = Drawing.new("Text")
-                            tag.Size = 14
-                            tag.Center = true
-                            tag.Outline = true
-                            tag.Font = 2
-                            esp_objects[p] = tag
-                        end
-
-                        local tag = esp_objects[p]
-                        local dist = math.floor((Camera.CFrame.Position - p.Character.Head.Position).Magnitude)
-                        local team = p.Team and p.Team.Name or "FFA"
-                        tag.Position = Vector2.new(pos.X, pos.Y - 25)
-                        tag.Text = string.format("%s\n[%s] %dM", p.Name, team, dist)
-                        tag.Color = (p.Team == LocalPlayer.Team and not IsFFA()) and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-                        tag.Visible = true
-                    end
-                end
-            end
-        end
+-- Hotkeys
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Z then
+        SpeedHack = not SpeedHack
+        print("Speed Hack:", SpeedHack and "ON" or "OFF")
+    elseif input.KeyCode == Enum.KeyCode.X then
+        AimbotAtivo = not AimbotAtivo
+        print("Aimbot:", AimbotAtivo and "ON" or "OFF")
+    elseif input.KeyCode == Enum.KeyCode.C then
+        ESPAtivo = not ESPAtivo
+        print("ESP:", ESPAtivo and "ON" or "OFF")
+    elseif input.KeyCode == Enum.KeyCode.V then
+        KillThroughWalls = not KillThroughWalls
+        print("Kill Through Walls:", KillThroughWalls and "ON" or "OFF")
     end
 end)
 
--- Botões
-CreateToggle("Speed Hack", 40, function(v) SpeedHack = v end)
-CreateToggle("Aimbot", 80, function(v) AimbotAtivo = v end)
-CreateToggle("ESP", 120, function(v) ESPAtivo = v end)
-CreateToggle("Kill Through Walls", 160, function(v) KillThroughWalls = v end)
+-- Botões com hotkeys exibidos
+CreateToggle("Speed Hack", "Z", 40, function(v) SpeedHack = v end)
+CreateToggle("Aimbot", "X", 80, function(v) AimbotAtivo = v end)
+CreateToggle("ESP", "C", 120, function(v) ESPAtivo = v end)
+CreateToggle("Kill Through Walls", "V", 160, function(v) KillThroughWalls = v end)
 
-print("[Pedrin Hub] ✅ Aimbot ajustado, matar através da parede e botão de minimizar adicionados!")
+print("[Pedrin Hub] ✅ Hotkeys exibidas na interface!")
