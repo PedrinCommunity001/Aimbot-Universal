@@ -1,4 +1,4 @@
--- Pedrin Hub (Final v3) - Hotkeys corrigidas, design aprimorado e movimentação simplificada
+-- Pedrin Hub (Final v3) - Hotkeys corrigidas, design aprimorado e bugs resolvidos
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -74,7 +74,7 @@ OpenBtn.MouseButton1Click:Connect(function()
     OpenBtn.Visible = false
 end)
 
--- Movimentação simplificada do hub
+-- Movimentação do hub
 local dragging, dragInput, dragStart, startPos
 Frame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
